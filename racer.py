@@ -19,19 +19,43 @@ gameDisplay = pygame.display.set_mode((display_width,display_height))
 pygame.display.set_caption('A bit Racey')
 clock = pygame.time.Clock()
 
-carImg = pygame.image.load('racecar.png')
 
 
 def things_dodged(count):
     font = pygame.font.SysFont(None, 25)
     text = font.render("Dodged: "+str(count), True, black)
-    gameDisplay.blit(text,(0,0))
+    gameDisplay.blit(text,(0,0))    
 
-def things(thingx, thingy, thingw, thingh, color):
-    pygame.draw.rect(gameDisplay, color, [thingx, thingy, thingw, thingh])
+class Car:
+    def __init__(self):
+        self.img = carImg = pygame.image.load('racecar.png')
+        self.x, self.y = ((display_width * 0.45), (display_height * 0.8))
+        self.width = 73
+        self.speed = 5
 
-def car(x,y):
-    gameDisplay.blit(carImg,(x,y))
+    def draw(self):
+        gameDisplay.blit(self.img, (self.x, self.y))
+
+    def move(self, dir):
+        self.x += dir
+
+    def __repr__(self):
+        return 'Car object at {} running at speed {}'.format((self.x, self.y), self.speed)
+
+class Thing:
+    def __init__(self):            
+        self.x, self.y = (random.randrange(0, display_width),-600)
+        self.speed = 4
+        self.width = 100
+        self.height = 100
+        self.color = pygame.color.Color('pink')
+
+    def draw(self):
+        pygame.draw.rect(gameDisplay, self.color, [self.x, self.y, self.width, self.height])
+
+    def move(self):
+        self.y += self.speed
+
 
 def text_objects(text, font):
     textSurface = font.render(text, True, black)
@@ -45,25 +69,19 @@ def message_display(text):
 
     pygame.display.update()
 
-    
-
 def crash():
     message_display('You Crashed')
+    car = Car()
+    thing = Thing()
     time.sleep(2)
-    game_loop()
+    print(car)
+    game_loop(car, thing)
     
-    
-def game_loop():
-    x = (display_width * 0.45)
-    y = (display_height * 0.8)
+car = Car()
+thing = Thing()
 
+def game_loop(car, thing):
     x_change = 0
-
-    thing_startx = random.randrange(0, display_width)
-    thing_starty = -600
-    thing_speed = 4
-    thing_width = 100
-    thing_height = 100
 
     thingCount = 1
 
@@ -80,46 +98,43 @@ def game_loop():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    x_change = -5
+                    x_change = -(car.speed)
                 if event.key == pygame.K_RIGHT:
-                    x_change = 5
+                    x_change = car.speed
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     x_change = 0
 
-        x += x_change
-        gameDisplay.fill(white)
-
-        # things(thingx, thingy, thingw, thingh, color)
-        things(thing_startx, thing_starty, thing_width, thing_height, block_color)
-
-
-        
-        thing_starty += thing_speed
-        car(x,y)
+        gameDisplay.fill(pygame.color.Color('azure4'))
+              
+        car.draw()
+        thing.draw()
+        car.move(x_change)
+        thing.move()
         things_dodged(dodged)
 
-        if x > display_width - car_width or x < 0:
+        if car.x > display_width - car.width or car.x < 0:
             crash()
 
-        if thing_starty > display_height:
-            thing_starty = 0 - thing_height
-            thing_startx = random.randrange(0,display_width)
+        if thing.y > display_height:
+            thing.y = 0 - thing.height
+            thing.x = random.randrange(0,display_width)
             dodged += 1
-            thing_speed += 1
-            thing_width += (dodged * 1.2)
+            thing.speed += 1
+            car.speed += 1
+            thing.width += (dodged * 1.2)
 
-        if y < thing_starty+thing_height:
+        if car.y < thing.y+thing.height:
             # print('y crossover')
 
-            if x > thing_startx and x < thing_startx + thing_width or x+car_width > thing_startx and x + car_width < thing_startx+thing_width:
+            if car.x > thing.x and car.x < thing.x + thing.width or car.x+car.width > thing.x and car.x + car.width < thing.x+thing.width:
                 # print('x crossover')
                 crash()
         
         pygame.display.update()
         clock.tick(60)
 
-game_loop()
+game_loop(car, thing)
 pygame.quit()
 quit()
