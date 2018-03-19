@@ -71,16 +71,16 @@ def message_display(text):
 
 def crash():
     message_display('You Crashed')
-    car = Car()
-    thing = Thing()
+    car.__init__()
+    thing.__init__()
     time.sleep(2)
     print(car)
-    game_loop(car, thing)
+    game_loop()
     
 car = Car()
 thing = Thing()
 
-def game_loop(car, thing):
+def game_loop():
     x_change = 0
 
     thingCount = 1
@@ -135,6 +135,6 @@ def game_loop(car, thing):
         pygame.display.update()
         clock.tick(60)
 
-game_loop(car, thing)
+game_loop()
 pygame.quit()
 quit()
